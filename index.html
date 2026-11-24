@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="artifact-type" content="tool">
+  <meta name="design-style" content="canopy">
+  <title>Ithiri — Make the Most of Every Grocery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..600&family=Noto+Sans+Sinhala:wght@400;600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@1.43.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-top">
+        <div class="brand-group">
+          <div class="brand-mark" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+              <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+            </svg>
+          </div>
+          <div>
+            <p class="brand-title" data-i18n="brandName">Ithiri</p>
+            <p class="brand-sub" data-i18n="brandTagline">Sri Lankan Smart Kitchen &amp; Expiry Tracker</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="openVoiceModal()">
+            <i data-lucide="mic" aria-hidden="true"></i>
+            <span data-i18n="btnVoiceUpdate">Voice Update</span>
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" onclick="openAddModal()">
+            <i data-lucide="plus" aria-hidden="true"></i>
+            <span data-i18n="btnQuickAdd">Quick Add</span>
+          </button>
+          <div class="lang-toggle" role="group" aria-label="Language switcher">
+            <button type="button" id="lang-btn-en" class="lang-btn" aria-pressed="true" onclick="setLanguage('en')">EN</button>
+            <button type="button" id="lang-btn-si" class="lang-btn" aria-pressed="false" onclick="setLanguage('si')">සිංහල</button>
+          </div>
+        </div>
+      </div>
+
+      <nav class="nav-bar" aria-label="Main navigation">
+        <button type="button" class="nav-tab" data-view="dashboard" aria-current="page" onclick="switchView('dashboard')">
+          <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+          <span data-i18n="navDashboard">Dashboard</span>
+        </button>
+        <button type="button" class="nav-tab" data-view="inventory" onclick="switchView('inventory')">
+          <i data-lucide="refrigerator" aria-hidden="true"></i>
+          <span data-i18n="navMyFood">My Food</span>
+          <span class="nav-badge" id="badge-inventory">0</span>
+        </button>
+        <button type="button" class="nav-tab" data-view="use-first" onclick="switchView('use-first')">
+          <i data-lucide="clock-alert" aria-hidden="true"></i>
+          <span data-i18n="navUseFirst">Use First</span>
+          <span class="nav-badge is-urgent" id="badge-use-first">0</span>
+        </button>
+        <button type="button" class="nav-tab" data-view="recipes" onclick="switchView('recipes')">
+          <i data-lucide="utensils" aria-hidden="true"></i>
+          <span data-i18n="navRecipes">Recipes</span>
+        </button>
+        <button type="button" class="nav-tab" data-view="shopping" onclick="switchView('shopping')">
+          <i data-lucide="shopping-basket" aria-hidden="true"></i>
+          <span data-i18n="navShopping">Shopping List</span>
+          <span class="nav-badge" id="badge-shopping">0</span>
+        </button>
+        <button type="button" class="nav-tab" data-view="tips" onclick="switchView('tips')">
+          <i data-lucide="thermometer-sun" aria-hidden="true"></i>
+          <span data-i18n="navTips">Storage Tips</span>
+        </button>
+        <button type="button" class="nav-tab" data-view="insights" onclick="switchView('insights')">
+          <i data-lucide="bar-chart-3" aria-hidden="true"></i>
+          <span data-i18n="navInsights">Monthly Insights</span>
+        </button>
+        <button type="button" class="nav-tab" data-view="settings" onclick="switchView('settings')">
+          <i data-lucide="settings" aria-hidden="true"></i>
+          <span data-i18n="navSettings">Settings</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-grid">
+    <!-- VIEW 1: DASHBOARD -->
+    <section id="view-dashboard" class="view-section is-active" aria-labelledby="hero-heading">
+      <div class="hero-card">
+        <div>
+          <div class="hero-greeting-row">
+            <span class="kicker" id="greeting-text">Good morning</span>
+            <span class="colombo-pill" id="colombo-clock">Colombo</span>
+          </div>
+          <h1 id="hero-heading" class="hero-title" data-i18n="heroHeadline">Make the Most of Every Grocery.</h1>
+          <p class="hero-desc" data-i18n="heroSubtitle">Track pantry, fridge, and freezer freshness in Sri Lanka's tropical climate, decode real food date labels, and cook authentic dishes before ingredients go to waste.</p>
+          <div class="hero-actions">
+            <button type="button" class="btn btn-primary" onclick="openAddModal()">
+              <i data-lucide="plus-circle" aria-hidden="true"></i>
+              <span data-i18n="btnQuickAddFood">Quick Add Food</span>
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="openVoiceModal()">
+              <i data-lucide="mic" aria-hidden="true"></i>
+              <span data-i18n="btnVoiceUpdate">Voice Update</span>
+            </button>
+            <button type="button" class="btn btn-ochre" id="hero-demo-btn" onclick="loadSampleKitchen()">
+              <i data-lucide="sparkles" aria-hidden="true"></i>
+              <span data-i18n="btnLoadSample">Load Sample Sri Lankan Kitchen</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="hero-art" aria-hidden="true">
+          <svg class="hero-svg" viewBox="0 0 320 250" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="160" cy="218" rx="115" ry="18" fill="var(--surface-container-high)" opacity="0.7"/>
+            <path d="M55 135 Q160 115 265 135 L245 205 Q160 222 75 205 Z" fill="var(--tertiary)" />
+            <path d="M55 135 Q160 155 265 135 Q160 118 55 135 Z" fill="var(--tertiary-container)" />
+            <g transform="translate(82,62) rotate(-14)">
+              <path d="M18 0 C28 18 24 68 18 76 C12 68 8 18 18 0 Z" fill="var(--art-carrot)" />
+              <path d="M18 0 Q10 -15 4 -18 M18 0 Q18 -20 18 -22 M18 0 Q26 -15 32 -18" stroke="var(--art-leaf)" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </g>
+            <g transform="translate(135,58)">
+              <circle cx="28" cy="48" r="28" fill="var(--art-coconut)" />
+              <circle cx="28" cy="48" r="20" fill="var(--art-cream)" />
+              <circle cx="28" cy="48" r="13" fill="var(--surface-container-low)" />
+            </g>
+            <g transform="translate(185,68) rotate(12)">
+              <circle cx="22" cy="36" r="20" fill="var(--art-tomato)" />
+              <path d="M22 16 Q16 8 10 12 M22 16 Q22 6 24 6 M22 16 Q28 8 34 12" stroke="var(--art-leaf)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            </g>
+            <g transform="translate(115,105)">
+              <ellipse cx="22" cy="24" rx="18" ry="15" fill="var(--art-onion)" />
+              <path d="M22 9 Q22 2 25 0" stroke="var(--art-leaf)" stroke-width="3" stroke-linecap="round"/>
+            </g>
+            <g transform="translate(178,108)">
+              <circle cx="16" cy="20" r="14" fill="var(--art-lime)" />
+              <path d="M16 6 Q26 2 28 10 Q20 12 16 6 Z" fill="var(--art-leaf)" />
+            </g>
+            <path d="M40 72 Q58 55 72 72 Q56 84 40 72 Z" fill="var(--art-leaf-light)" opacity="0.85"/>
+            <path d="M250 65 Q268 48 282 65 Q266 78 250 65 Z" fill="var(--art-leaf)" opacity="0.8"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Canopy 7-Day FIFO Cycle Strip -->
+      <div class="season-strip" aria-label="7-day freshness schedule">
+        <div>
+          <span class="label-mono" data-i18n="fifoStripLabel">7-DAY FIFO FRESHNESS WINDOW</span>
+          <p style="font-size:0.85rem;color:var(--on-surface-variant);" data-i18n="fifoStripHint">Place soonest dates at the front of each shelf (First In, First Out).</p>
+        </div>
+        <div class="season-cells" id="fifo-strip-cells"></div>
+      </div>
+
+      <!-- Smart Availability 3-Day Prompt Container -->
+      <div id="availability-check-container"></div>
+
+      <!-- KPI Overview -->
+      <div class="kpi-grid" id="dashboard-kpis"></div>
+
+      <!-- Active Overview Split: Expiring Alerts + Quick Recipes -->
+      <div class="split-grid">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);flex-wrap:wrap;">
+            <div>
+              <span class="kicker" data-i18n="dashAlertKicker">Priority FIFO Queue</span>
+              <h2 data-i18n="dashExpiringTitle">Expiring Soon &amp; Safety Alerts</h2>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="switchView('use-first')" data-i18n="btnViewAll">View All</button>
+          </div>
+          <div id="dash-alerts-list" style="display:flex;flex-direction:column;gap:var(--space-sm);"></div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);flex-wrap:wrap;">
+            <div>
+              <span class="kicker" data-i18n="dashRecipeKicker">Cook Before It Spoils</span>
+              <h2 data-i18n="dashRecipeTitle">Recommended Today</h2>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="switchView('recipes')" data-i18n="btnAllRecipes">All Recipes</button>
+          </div>
+          <div id="dash-recipes-preview" style="display:flex;flex-direction:column;gap:var(--space-sm);"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: MY FOOD INVENTORY -->
+    <section id="view-inventory" class="view-section" aria-labelledby="inv-heading">
+      <div style="display:flex;justify-content:space-between;align-items:end;gap:var(--space-md);flex-wrap:wrap;">
+        <div>
+          <span class="kicker" data-i18n="invKicker">Kitchen Stock</span>
+          <h2 id="inv-heading" data-i18n="invTitle">My Food Inventory</h2>
+        </div>
+        <div style="display:flex;gap:var(--space-sm);flex-wrap:wrap;">
+          <button type="button" class="btn btn-secondary btn-sm" id="undo-inv-btn" onclick="undoLastAction()" disabled>
+            <i data-lucide="undo-2" aria-hidden="true"></i>
+            <span data-i18n="btnUndo">Undo</span>
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" onclick="openAddModal()">
+            <i data-lucide="plus" aria-hidden="true"></i>
+            <span data-i18n="btnAddItem">Add Food Item</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="form-grid">
+          <div class="field">
+            <label for="inv-search" data-i18n="lblSearchFood">Search food items</label>
+            <input type="text" id="inv-search" oninput="renderInventory()" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="inv-filter-cat" data-i18n="lblFilterCategory">Category</label>
+            <select id="inv-filter-cat" onchange="renderInventory()"></select>
+          </div>
+          <div class="field">
+            <label for="inv-filter-loc" data-i18n="lblFilterLocation">Storage Location</label>
+            <select id="inv-filter-loc" onchange="renderInventory()"></select>
+          </div>
+          <div class="field">
+            <label for="inv-filter-status" data-i18n="lblFilterStatus">Freshness Status</label>
+            <select id="inv-filter-status" onchange="renderInventory()"></select>
+          </div>
+        </div>
+      </div>
+
+      <div id="inventory-grid" class="card-grid"></div>
+    </section>
+
+    <!-- VIEW 3: USE FIRST -->
+    <section id="view-use-first" class="view-section" aria-labelledby="usefirst-heading">
+      <div>
+        <span class="kicker" data-i18n="ufKicker">First In, First Out (FIFO)</span>
+        <h2 id="usefirst-heading" data-i18n="ufTitle">Use First Priority Queue</h2>
+        <p style="color:var(--on-surface-variant);margin-top:4px;" data-i18n="ufSubtitle">Items nearing freshness or expiry deadlines. Items past strict Use-By dates are excluded from recipe suggestions for food safety.</p>
+      </div>
+      <div id="use-first-safety-box"></div>
+      <div id="use-first-grid" class="card-grid"></div>
+    </section>
+
+    <!-- VIEW 4: SMART SRI LANKAN RECIPES -->
+    <section id="view-recipes" class="view-section" aria-labelledby="recipes-heading">
+      <div style="display:flex;justify-content:space-between;align-items:end;gap:var(--space-md);flex-wrap:wrap;">
+        <div>
+          <span class="kicker" data-i18n="recKicker">Pantry-Matched Meals</span>
+          <h2 id="recipes-heading" data-i18n="recTitle">Smart Sri Lankan Recipes</h2>
+        </div>
+        <div class="filter-row">
+          <button type="button" class="chip-btn" id="rec-filter-all" aria-pressed="true" onclick="setRecipeFilter('all')" data-i18n="recFilterAll">All Dishes</button>
+          <button type="button" class="chip-btn" id="rec-filter-priority" aria-pressed="false" onclick="setRecipeFilter('priority')" data-i18n="recFilterPriority">Uses Expiring Items</button>
+        </div>
+      </div>
+      <div id="recipes-grid" class="card-grid"></div>
+    </section>
+
+    <!-- VIEW 5: SMART SHOPPING LIST -->
+    <section id="view-shopping" class="view-section" aria-labelledby="shop-heading">
+      <div>
+        <span class="kicker" data-i18n="shopKicker">Smart Replenishment</span>
+        <h2 id="shop-heading" data-i18n="shopTitle">Smart Shopping List</h2>
+      </div>
+
+      <div id="shop-alerts-box" style="display:flex;flex-direction:column;gap:var(--space-sm);"></div>
+
+      <div class="card">
+        <h3 style="margin-bottom:var(--space-md);" data-i18n="shopAddTitle">Add Grocery to Shopping List</h3>
+        <form id="shop-add-form" class="form-grid" onsubmit="handleShopAdd(event)">
+          <div class="field">
+            <label for="shop-name" data-i18n="lblItemName">Item Name</label>
+            <input type="text" id="shop-name" required oninput="checkShopDuplicateWarning()">
+          </div>
+          <div class="field">
+            <label for="shop-qty" data-i18n="lblQuantity">Quantity</label>
+            <input type="number" id="shop-qty" min="0.1" step="0.1" value="1" required>
+          </div>
+          <div class="field">
+            <label for="shop-unit" data-i18n="lblUnit">Unit</label>
+            <select id="shop-unit"></select>
+          </div>
+          <div class="field">
+            <label for="shop-price" data-i18n="lblEstPrice">Estimated Price (LKR)</label>
+            <input type="number" id="shop-price" min="0" step="10" value="250">
+          </div>
+          <div class="field">
+            <label for="shop-loc" data-i18n="lblStorageLoc">Store In</label>
+            <select id="shop-loc"></select>
+          </div>
+          <div>
+            <button type="submit" class="btn btn-primary" style="width:100%;" data-i18n="btnAddToList">Add to List</button>
+          </div>
+        </form>
+        <div id="shop-dup-warning" class="field-error" style="margin-top:var(--space-sm);"></div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:var(--space-md);flex-wrap:wrap;">
+        <p class="label-mono" id="shop-summary-text"></p>
+        <button type="button" class="btn btn-primary" id="transfer-purchased-btn" onclick="transferPurchasedToInventory()" disabled>
+          <i data-lucide="package-check" aria-hidden="true"></i>
+          <span data-i18n="btnTransferPurchased">Transfer Checked Items to My Food</span>
+        </button>
+      </div>
+
+      <div id="shopping-list-container" style="display:flex;flex-direction:column;gap:var(--space-sm);"></div>
+    </section>
+
+    <!-- VIEW 6: CLIMATE-SPECIFIC STORAGE TIPS -->
+    <section id="view-tips" class="view-section" aria-labelledby="tips-heading">
+      <div>
+        <span class="kicker" data-i18n="tipsKicker">Tropical Food Science</span>
+        <h2 id="tips-heading" data-i18n="tipsTitle">Sri Lankan Climate Storage &amp; Date Label Guide</h2>
+        <p style="color:var(--on-surface-variant);margin-top:4px;" data-i18n="tipsSubtitle">Evidence-based guidance adapted for 28–33°C heat and 75–85% humidity, combining FDA/USDA storage charts and consumer date-label research.</p>
+      </div>
+
+      <div class="card is-leaf-highlight">
+        <h3 style="margin-bottom:var(--space-sm);" data-i18n="labelDecoderTitle">Date Label Confusion vs. Reality</h3>
+        <p style="margin-bottom:var(--space-md);" data-i18n="labelDecoderIntro">Research (Kavanaugh &amp; Quinlan, 2020) shows 81.6% of consumers check date labels, yet only 57.4% correctly understand "Best By / Use By" — causing safe food to be needlessly discarded. Know the difference:</p>
+        <div class="card-grid" id="label-decoder-cards"></div>
+      </div>
+
+      <div class="filter-row" id="tips-filter-row"></div>
+      <div class="card-grid" id="tips-cards-grid"></div>
+
+      <div class="card">
+        <h3 style="margin-bottom:var(--space-sm);" data-i18n="fdaTableTitle">Quick Reference: Safe Refrigerator (≤ 4°C) &amp; Freezer (-18°C) Windows</h3>
+        <p style="font-size:0.86rem;color:var(--on-surface-variant);margin-bottom:var(--space-md);" data-i18n="fdaTableNote">Freezing at 0°F (-18°C) keeps food safe indefinitely; freezer timelines reflect optimal flavor and texture. Chill hot cooked curries and rice within 90 minutes (danger zone: 8°C–63°C).</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th data-i18n="thFoodItem">Food Item</th>
+                <th data-i18n="thFridgeWindow">Fridge (≤ 4°C)</th>
+                <th data-i18n="thFreezerWindow">Freezer (-18°C)</th>
+              </tr>
+            </thead>
+            <tbody id="fda-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 7: MONTHLY INSIGHTS -->
+    <section id="view-insights" class="view-section" aria-labelledby="insights-heading">
+      <div style="display:flex;justify-content:space-between;align-items:end;gap:var(--space-md);flex-wrap:wrap;">
+        <div>
+          <span class="kicker" data-i18n="insKicker">Household Analytics</span>
+          <h2 id="insights-heading" data-i18n="insTitle">Monthly Insights &amp; Waste Tracker (LKR)</h2>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="exportInsightsCsv()">
+          <i data-lucide="download" aria-hidden="true"></i>
+          <span data-i18n="btnExportCsv">Export History CSV</span>
+        </button>
+      </div>
+
+      <div class="kpi-grid" id="insights-kpis"></div>
+
+      <div class="split-grid">
+        <div class="card">
+          <h3 style="margin-bottom:var(--space-md);" data-i18n="chartConsumedVsWaste">Consumption vs. Waste Ratio (LKR)</h3>
+          <div class="chart-box">
+            <canvas id="chart-ratio"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:var(--space-md);" data-i18n="chartCategorySpend">Spend &amp; Waste by Category (LKR)</h3>
+          <div class="chart-box">
+            <canvas id="chart-category"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom:var(--space-md);" data-i18n="historyTableTitle">Purchase, Consumption &amp; Disposal History</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th data-i18n="thDate">Date</th>
+                <th data-i18n="thItem">Item</th>
+                <th data-i18n="thAction">Action</th>
+                <th data-i18n="thQty">Qty</th>
+                <th data-i18n="thValueLkr">Value (LKR)</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 8: SETTINGS -->
+    <section id="view-settings" class="view-section" aria-labelledby="settings-heading">
+      <div>
+        <span class="kicker" data-i18n="setKicker">Household Preferences</span>
+        <h2 id="settings-heading" data-i18n="setTitle">Settings &amp; Kitchen Profile</h2>
+      </div>
+
+      <div class="split-grid">
+        <div class="card">
+          <h3 style="margin-bottom:var(--space-md);" data-i18n="setProfileTitle">Household &amp; Alert Settings</h3>
+          <form class="form-grid" onsubmit="saveSettingsForm(event)">
+            <div class="field">
+              <label for="set-household" data-i18n="lblHouseholdName">Household Name</label>
+              <input type="text" id="set-household" required>
+            </div>
+            <div class="field">
+              <label for="set-zone" data-i18n="lblClimateZone">Sri Lankan Climate Zone</label>
+              <select id="set-zone">
+                <option value="wet" data-i18n="zoneWet">Wet Zone (Colombo / Galle — High Humidity)</option>
+                <option value="dry" data-i18n="zoneDry">Dry Zone (Anuradhapura / Jaffna — High Heat)</option>
+                <option value="hill" data-i18n="zoneHill">Hill Country (Kandy / Nuwara Eliya — Cool)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="set-alert-days" data-i18n="lblAlertDays">Expiry Warning Lead Time (Days)</label>
+              <select id="set-alert-days">
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="5">5</option>
+                <option value="7">7</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="set-avail-check" data-i18n="lblEnable3Day">3-Day Smart Availability Prompt</label>
+              <select id="set-avail-check">
+                <option value="true" data-i18n="optEnabled">Enabled</option>
+                <option value="false" data-i18n="optDisabled">Disabled</option>
+              </select>
+            </div>
+            <div style="grid-column: 1 / -1;">
+              <button type="submit" class="btn btn-primary" data-i18n="btnSaveSettings">Save Preferences</button>
+              <span id="settings-saved-msg" style="margin-left:12px;color:var(--positive);font-weight:700;"></span>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom:var(--space-sm);" data-i18n="setDataTitle">Kitchen Data Management</h3>
+          <p style="color:var(--on-surface-variant);margin-bottom:var(--space-md);" data-i18n="setDataDesc">Your kitchen inventory, shopping list, and purchase history persist across sessions. Load a starter Sri Lankan pantry or reset data below.</p>
+          <div style="display:flex;flex-direction:column;gap:var(--space-sm);">
+            <button type="button" class="btn btn-secondary" onclick="loadSampleKitchen()">
+              <i data-lucide="sparkles" aria-hidden="true"></i>
+              <span data-i18n="btnLoadSample">Load Sample Sri Lankan Kitchen</span>
+            </button>
+            <button type="button" class="btn btn-danger" id="reset-all-btn" onclick="handleResetAll(this)">
+              <i data-lucide="trash-2" aria-hidden="true"></i>
+              <span data-i18n="btnResetData">Reset All Kitchen Data</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p><strong data-i18n="footerTitle">Ithiri — Smart Kitchen &amp; Food Waste Reduction</strong></p>
+    <p data-i18n="footerSources">Guidance grounded in Kavanaugh &amp; Quinlan (2020) Food Control consumer date-label research, FDA Refrigerator &amp; Freezer Storage Chart, USDA Food Product Dating guidelines, High Speed Training FIFO &amp; Spoilage Guidance, and I Value Food leftover practices.</p>
+  </footer>
+
+  <!-- MODAL: QUICK ADD / EDIT FOOD -->
+  <div id="modal-add" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-add-title">
+    <div class="modal-panel">
+      <div class="modal-head">
+        <h2 id="modal-add-title" data-i18n="modalAddTitle">Quick Add Food Item</h2>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeAddModal()" aria-label="Close">
+          <i data-lucide="x" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <form id="food-form" onsubmit="handleFoodSubmit(event)">
+        <input type="hidden" id="food-edit-id" value="">
+        <div class="form-grid">
+          <div class="field" style="grid-column: 1 / -1;">
+            <label for="food-name" data-i18n="lblFoodNameSuggest">Food Item Name (auto-suggests image, category &amp; freshness)</label>
+            <input type="text" id="food-name" list="sl-food-suggestions" required oninput="onFoodNameSuggest()" autocomplete="off">
+            <datalist id="sl-food-suggestions"></datalist>
+          </div>
+
+          <div class="field">
+            <label for="food-qty" data-i18n="lblQuantity">Quantity</label>
+            <input type="number" id="food-qty" min="0.1" step="0.1" value="1" required>
+          </div>
+
+          <div class="field">
+            <label for="food-unit" data-i18n="lblUnit">Unit</label>
+            <select id="food-unit"></select>
+          </div>
+
+          <div class="field">
+            <label for="food-category" data-i18n="lblCategory">Category</label>
+            <select id="food-category"></select>
+          </div>
+
+          <div class="field">
+            <label for="food-location" data-i18n="lblStorageLoc">Storage Location</label>
+            <select id="food-location" onchange="recomputeSuggestedExpiry()"></select>
+          </div>
+
+          <div class="field">
+            <label for="food-purchase-date" data-i18n="lblPurchaseDate">Purchase Date</label>
+            <input type="date" id="food-purchase-date" required>
+          </div>
+
+          <div class="field">
+            <label for="food-expiry-date" data-i18n="lblExpiryDate">Expiry / Freshness Date</label>
+            <input type="date" id="food-expiry-date" required>
+          </div>
+
+          <div class="field">
+            <label for="food-label-type" data-i18n="lblDateType">Label Type</label>
+            <select id="food-label-type">
+              <option value="estimated" data-i18n="dtEstimated">Estimated Freshness (Tropical)</option>
+              <option value="best_by" data-i18n="dtBestBy">Best By / Peak Quality</option>
+              <option value="use_by" data-i18n="dtUseBy">Use By / Strict Safety</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="food-price" data-i18n="lblPriceLkr">Price (LKR)</label>
+            <input type="number" id="food-price" min="0" step="10" value="300">
+          </div>
+
+          <div class="field" style="grid-column: 1 / -1;">
+            <label for="food-notes" data-i18n="lblNotes">Notes (optional)</label>
+            <input type="text" id="food-notes">
+          </div>
+
+          <div class="field" style="grid-column: 1 / -1;">
+            <label data-i18n="lblFoodArtwork">Food Visual (auto-matched or choose)</label>
+            <div class="art-picker" id="food-art-picker" role="radiogroup"></div>
+          </div>
+
+          <div class="field" style="grid-column: 1 / -1;">
+            <label for="food-photo-file" data-i18n="lblUploadPhoto">Optional Session Photo Preview</label>
+            <input type="file" id="food-photo-file" accept="image/*" onchange="handlePhotoPreview(event)">
+          </div>
+        </div>
+
+        <div id="food-form-hint" style="margin-top:var(--space-md);font-size:0.86rem;color:var(--primary);font-weight:600;"></div>
+
+        <div style="display:flex;justify-content:flex-end;gap:var(--space-sm);margin-top:var(--space-lg);">
+          <button type="button" class="btn btn-secondary" onclick="closeAddModal()" data-i18n="btnCancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" data-i18n="btnSaveFood">Save Food Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: VOICE UPDATE (SPEECH-TO-TEXT) -->
+  <div id="modal-voice" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-voice-title">
+    <div class="modal-panel">
+      <div class="modal-head">
+        <h2 id="modal-voice-title" data-i18n="modalVoiceTitle">Voice Update (Speech-to-Text)</h2>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeVoiceModal()" aria-label="Close">
+          <i data-lucide="x" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <p style="color:var(--on-surface-variant);" data-i18n="voiceIntro">Speak or tap a sample phrase, edit the recognized text if needed, and apply it directly to your kitchen inventory.</p>
+
+      <div style="display:flex;gap:var(--space-sm);align-items:center;flex-wrap:wrap;">
+        <button type="button" class="btn btn-primary" id="voice-mic-btn" onclick="toggleSpeechRecognition()">
+          <i data-lucide="mic" aria-hidden="true"></i>
+          <span id="voice-mic-label" data-i18n="btnStartListening">Start Listening</span>
+        </button>
+        <span id="voice-status" style="font-size:0.86rem;color:var(--on-surface-variant);"></span>
+      </div>
+
+      <div class="filter-row">
+        <span class="label-mono" data-i18n="lblSamplePhrases">Sample Phrases:</span>
+        <button type="button" class="chip-btn" onclick="useVoicePreset(`Add five carrots`)">"Add five carrots"</button>
+        <button type="button" class="chip-btn" onclick="useVoicePreset(`I used two eggs`)">"I used two eggs"</button>
+        <button type="button" class="chip-btn" onclick="useVoicePreset(`Add 1 kg red onions for 480 rupees`)">"Add 1 kg red onions for 480 rupees"</button>
+        <button type="button" class="chip-btn" onclick="useVoicePreset(`Discard bread`)">"Discard bread"</button>
+      </div>
+
+      <div class="field">
+        <label for="voice-transcript" data-i18n="lblVoiceTranscript">Recognized / Editable Command</label>
+        <input type="text" id="voice-transcript" oninput="previewVoiceCommand()">
+      </div>
+
+      <div class="card" id="voice-preview-card" style="background:var(--primary-container);color:var(--on-primary-container);">
+        <span class="label-mono" style="color:var(--on-primary-container);" data-i18n="lblParsedAction">Parsed Inventory Action</span>
+        <p id="voice-preview-text" style="margin-top:6px;font-weight:700;"></p>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:var(--space-sm);">
+        <button type="button" class="btn btn-secondary" onclick="closeVoiceModal()" data-i18n="btnCancel">Cancel</button>
+        <button type="button" class="btn btn-primary" id="voice-apply-btn" onclick="applyVoiceCommand()" data-i18n="btnApplyVoice">Apply Update</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST / UNDO BAR -->
+  <div id="toast-bar" class="toast-bar" role="status" aria-live="polite">
+    <span id="toast-message"></span>
+    <button type="button" id="toast-undo-btn" class="btn btn-ochre btn-sm" style="display:none;" onclick="undoLastAction()" data-i18n="btnUndo">Undo</button>
+  </div>
+
+  <api-shim></api-shim>
+
+  <script src="script.js"></script>
+</body>
+</html>
