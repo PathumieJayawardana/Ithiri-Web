@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ithiri - Smart Household Food Inventory & Expiry Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="logo">
+      <span class="logo-icon">🌿</span>
+      <span class="logo-text">Ithiri <span class="logo-sub" id="logoSub">ඉතිරි</span></span>
+    </div>
+    <nav class="nav-links">
+      <button class="nav-btn active" onclick="switchTab('dashboard')" id="navDash">Dashboard</button>
+      <button class="nav-btn" onclick="switchTab('inventory')" id="navInv">My Food</button>
+      <button class="nav-btn" onclick="switchTab('useFirst')" id="navUseFirst">Use First</button>
+      <button class="nav-btn" onclick="switchTab('recipes')" id="navRecipes">Smart Recipes</button>
+      <button class="nav-btn" onclick="switchTab('shopping')" id="navShopping">Shopping List</button>
+      <button class="nav-btn" onclick="switchTab('tips')" id="navTips">Storage Tips</button>
+      <button class="nav-btn" onclick="switchTab('insights')" id="navInsights">Monthly Insights</button>
+    </nav>
+    <div class="header-right">
+      <button class="lang-toggle-btn" id="langBtn" onclick="toggleLanguage()">සිංහල</button>
+    </div>
+  </header>
+
+  <main class="app-main">
+    
+    <!-- Hero / Welcome Section -->
+    <section class="welcome-card card-3d">
+      <div class="welcome-info">
+        <div class="date-badge" id="currentDateBadge">📅 Loading date...</div>
+        <h1 id="greetingHeading">Good morning, Kitchen Manager!</h1>
+        <p id="heroTagline">Make the Most of Every Grocery. Keep track of food, reduce waste, and save money in LKR.</p>
+      </div>
+      <div class="hero-actions">
+        <button class="btn btn-hero-primary" onclick="openModal('quickAddModal')">
+          <span class="btn-icon">➕</span> <span id="quickAddBtnText">Quick Add Food</span>
+        </button>
+        <button class="btn btn-hero-secondary" onclick="startVoiceUpdate()">
+          <span class="btn-icon">🎙️</span> <span id="voiceUpdateBtnText">Voice Update</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 1. Dashboard Tab -->
+    <section id="dashboard" class="tab-content active">
+      <div class="section-title-row">
+        <h2 id="dashTitle">Kitchen Overview</h2>
+        <span class="subtitle-tag" id="dashSub">Live Inventory Summary</span>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card card-3d">
+          <div class="stat-icon">📦</div>
+          <div class="stat-info">
+            <span class="stat-value" id="totalCount">0</span>
+            <span class="stat-label" id="lblTotal">Total Items</span>
+          </div>
+        </div>
+        <div class="stat-card card-3d warning">
+          <div class="stat-icon">⚠️</div>
+          <div class="stat-info">
+            <span class="stat-value" id="expiringCount">0</span>
+            <span class="stat-label" id="lblExpiring">Expiring Soon (&le;3 Days)</span>
+          </div>
+        </div>
+        <div class="stat-card card-3d danger">
+          <div class="stat-icon">🚨</div>
+          <div class="stat-info">
+            <span class="stat-value" id="expiredCount">0</span>
+            <span class="stat-label" id="lblExpired">Expired</span>
+          </div>
+        </div>
+        <div class="stat-card card-3d success">
+          <div class="stat-icon">💰</div>
+          <div class="stat-info">
+            <span class="stat-value" id="savingsEstimate">LKR 0</span>
+            <span class="stat-label" id="lblSavings">Monthly Waste Saved</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expiry Alerts Banner -->
+      <div class="alerts-container card-3d" id="expiryAlertsBox">
+        <h3 id="alertsHeader">🔔 Important Expiry Reminders</h3>
+        <div class="alerts-list" id="alertsList"></div>
+      </div>
+
+      <!-- Smart 3-Day Availability Check Widget -->
+      <div class="availability-widget card-3d" id="availabilityWidget">
+        <h3>💡 Smart Availability Check</h3>
+        <div id="availabilityPrompt">Checking recent inventory items...</div>
+      </div>
+    </section>
+
+    <!-- 2. My Food Inventory Tab -->
+    <section id="inventory" class="tab-content">
+      <div class="section-header-controls">
+        <h2 id="invTitle">My Food Inventory</h2>
+        <div class="filter-controls">
+          <input type="text" id="searchInput" placeholder="Search groceries (e.g. Carrots, Milk)..." onkeyup="renderInventory()" />
+          <select id="categoryFilter" onchange="renderInventory()">
+            <option value="ALL">All Categories</option>
+            <option value="Vegetables">Vegetables</option>
+            <option value="Fruits">Fruits</option>
+            <option value="Dairy">Dairy</option>
+            <option value="Meat & Seafood">Meat & Seafood</option>
+            <option value="Pantry & Grains">Pantry & Grains</option>
+          </select>
+        </div>
+      </div>
+      <div class="inventory-grid" id="inventoryGrid"></div>
+    </section>
+
+    <!-- 3. Use First Tab -->
+    <section id="useFirst" class="tab-content">
+      <div class="section-title-row">
+        <h2 id="useFirstTitle">🔥 Use First (Priority Ingredients)</h2>
+        <span class="subtitle-tag danger-tag">Cook Before Spoiling</span>
+      </div>
+      <p id="useFirstDesc">These food items are expiring within 3 days. Prioritize them in your upcoming meals to minimize waste.</p>
+      <div class="inventory-grid" id="useFirstGrid"></div>
+    </section>
+
+    <!-- 4. Smart Recipes Tab -->
+    <section id="recipes" class="tab-content">
+      <div class="section-title-row">
+        <h2 id="recipesTitle">🍲 Sri Lankan Smart Recipes</h2>
+        <span class="subtitle-tag">Based on Available Ingredients</span>
+      </div>
+      <div class="recipe-grid" id="recipeGrid"></div>
+    </section>
+
+    <!-- 5. Smart Shopping List Tab -->
+    <section id="shopping" class="tab-content">
+      <div class="section-title-row">
+        <h2 id="shoppingTitle">🛒 Smart Shopping List</h2>
+        <button class="btn btn-sm btn-primary" onclick="addCustomShoppingItem()">+ Add Custom Item</button>
+      </div>
+      <div class="shopping-card card-3d">
+        <div class="shopping-list-items" id="shoppingListItems"></div>
+      </div>
+    </section>
+
+    <!-- 6. Storage Tips Tab -->
+    <section id="tips" class="tab-content">
+      <div class="section-title-row">
+        <h2 id="tipsTitle">🌡️ Tropical Climate Storage Tips (Sri Lanka)</h2>
+      </div>
+      <div class="tips-grid" id="tipsGrid"></div>
+    </section>
+
+    <!-- 7. Monthly Insights Tab -->
+    <section id="insights" class="tab-content">
+      <div class="section-title-row">
+        <h2 id="insightsTitle">📊 Monthly Expenditure & Waste Analytics</h2>
+      </div>
+      <div class="insights-summary-grid">
+        <div class="insight-box card-3d">
+          <h3>Total Grocery Spent (LKR)</h3>
+          <div class="big-money" id="totalSpentLkr">LKR 0</div>
+        </div>
+        <div class="insight-box card-3d success">
+          <h3>Value Consumed</h3>
+          <div class="big-money" id="totalConsumedLkr">LKR 0</div>
+        </div>
+        <div class="insight-box card-3d danger">
+          <h3>Value Discarded</h3>
+          <div class="big-money" id="totalDiscardedLkr">LKR 0</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Quick Add Food Modal -->
+  <div id="quickAddModal" class="modal-overlay">
+    <div class="modal-card card-3d">
+      <div class="modal-header">
+        <h3 id="modalTitle">Quick Add Grocery Item</h3>
+        <button class="close-btn" onclick="closeModal('quickAddModal')">&times;</button>
+      </div>
+      <form id="addFoodForm" onsubmit="handleAddFood(event)">
+        <div class="form-group">
+          <label>Food Item Name</label>
+          <input type="text" id="foodName" placeholder="e.g., Carrots, Mukunuwenna, Fresh Milk" required oninput="autoSuggestCategory(this.value)" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" id="quantity" step="any" value="1" required />
+          </div>
+          <div class="form-group">
+            <label>Unit</label>
+            <select id="unit">
+              <option value="kg">kg</option>
+              <option value="g">g</option>
+              <option value="items">items</option>
+              <option value="packs">packs</option>
+              <option value="L">L</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Category</label>
+            <select id="category">
+              <option value="Vegetables">Vegetables</option>
+              <option value="Fruits">Fruits</option>
+              <option value="Dairy">Dairy</option>
+              <option value="Meat & Seafood">Meat & Seafood</option>
+              <option value="Pantry & Grains">Pantry & Grains</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Storage Location</label>
+            <select id="location">
+              <option value="Refrigerator">Refrigerator</option>
+              <option value="Freezer">Freezer</option>
+              <option value="Pantry">Pantry Shelf</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Expiry Date</label>
+            <input type="date" id="expiryDate" required />
+          </div>
+          <div class="form-group">
+            <label>Price (LKR)</label>
+            <input type="number" id="price" placeholder="e.g. 450" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Save to Inventory</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('quickAddModal')">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
